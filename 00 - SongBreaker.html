@@ -1,0 +1,365 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤘 SongBreaker</title>
+
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@200;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        .columnContainer {
+            display: flex;
+            flex-direction: column;
+            margin: 4px;
+        }
+        
+        .rowContainer {
+            display: flex;
+            flex-direction: row;
+            margin: 4px;
+            max-width: 800px;
+        }
+        
+        .item {
+            display: inline-block;
+            width: 450px;
+        }
+        
+        textarea {
+            margin-right: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h1 style="font-size: 23px;">🤘 SongBreaker</h1>
+    </div>
+    <sup>
+        Author: Rafał Wolsztyniak | <a href="https://github.com/rafal-wolsztyniak/SongBreaker/" target="_blank">GitHub</a> | <a href="https://www.linkedin.com/in/rafal-wolsztyniak/" target="_blank">LinkedIn</a> | <a href="https://twitter.com/HelloRafal/" target="_blank">Twitter</a> 
+	</sup>
+
+
+    <form onchange="SongBreaker()" onkeyup="SongBreaker()" style="width: 100%; display: block">
+
+        <br>
+        <hr><br>
+        <div class="rowContainer">
+            <div>
+                Paste your lyrics below (<a onclick="toggleLyrics()">or click here</a>):<br>
+                <textarea rows="117" cols="45" id="lyricsInput"></textarea>
+            </div>
+            <div class="columnContainer">
+                <div>
+                    <label> Starting charcode:&nbsp;<br>
+					<input type="number" id="charCode" value="10384">
+					<input type="button" value="Randomize!" onclick="randomCharset()">
+					<input type="button" value="Braillize!" onclick="defaultCharCode()">
+				</label>
+                    <div class="item"><br> Structure string:<br><br> <span id='structureString' style="word-wrap: break-word"></span>
+                        <hr>
+                    </div>
+                    <div class="item"><br> Word Array:<br><br> <span id='wordAnalysis' style="word-wrap: break-word"></span>
+                        <hr>
+                    </div>
+                    <div class="item"><br> Word String:<br><br> <span id='wordString' style="word-wrap: break-word"></span>
+                        <hr>
+                    </div>
+                    <div class="item"><br> Word list:<br><br> <span id='wordArray' style="word-wrap: break-word"></span>
+                        <hr>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+            <div id='lyricsBlock' style="word-wrap: break-word"></div>
+
+            <div id='outputBlock' style="word-wrap: break-word"></div>
+
+    </form>
+</body>
+
+</html>
+
+<script>
+    var song = {
+            structure: null,
+            words: []
+        }
+        // Input Nodes
+    var lyricsInputNode = document.getElementById("lyricsInput");
+    var charCodeNode = document.getElementById("charCode");
+
+    // Output Nodes
+    var wordAnalysisNode = document.getElementById("wordAnalysis");
+    var wordArrayNode = document.getElementById("wordArray");
+    var wordStringNode = document.getElementById("wordString");
+    var structureStringNode = document.getElementById("structureString");
+
+    // Asign the default song
+    var currentLyrics = 1;
+    toggleLyrics();
+    lyrics = lyricsInputNode.value;
+
+
+    var jsLinebreak = String.fromCharCode(10); // this the line break character for JavaScript
+    //var htmlLinebreak = '<br>'; // what will be the linebreak in the final output
+    var symbolLinebreak = '♫'
+
+
+
+    // ♫ ♬ •
+
+
+
+    function SongBreaker() {
+        song.words = [];
+        song.structure = null;
+        console.clear();
+        var lyrics = lyricsInputNode.value;
+        var charset = parseInt(charCodeNode.value);
+        var words = lyrics.replaceAll(",", ', ').replaceAll(jsLinebreak, ' ');
+        words = words.split(' '); // convert this to an array
+        words.sort(function(a, b) {
+            // ASC  -> a.length - b.length
+            // DESC -> b.length - a.length
+            return b.length - a.length; // used to sort the string by descending length  https://stackoverflow.com/questions/10630766/how-to-sort-an-array-based-on-the-length-of-each-element
+        });
+
+
+
+        var structure = '[structure]'
+        words = [...new Set(words)]; // used to dedupe the string array: https://stackoverflow.com/questions/9229645/remove-duplicate-values-from-js-array
+        words.pop();
+
+        var structure = lyrics.replaceAll(",", ' ,').replaceAll(jsLinebreak, ' ' + symbolLinebreak + ' ');
+
+        for (c = 0; c < words.length; c++) {
+
+            if (words[c].length > 0) {
+                //structure = structure.replaceAll(words[c], c); // will show the indexes in the string
+                //console.log(`charset=${charset} ${typeof charset}/ c=${c}`);
+                structure = structure.replaceAll(words[c], String.fromCodePoint(charset + c)).replaceAll(' ', '');
+
+            }
+        }
+        song.words = words;
+        song.structure = structure;
+
+        wordAnalysisNode.innerHTML = `${JSON.stringify(song.words)}`;
+        wordArrayNode.innerHTML = `${song.words.join('<br>')}`;
+        wordStringNode.innerHTML = `"${song.words.join(' ')}"`;
+        structureStringNode.innerHTML = song.structure;
+
+
+        console.log([
+            song.words,
+            song.words.length,
+            '-',
+            song.structure,
+            song.structure.length
+        ])
+    }
+    SongBreaker();
+
+    function randomCharset() {
+        charCodeNode.value = Math.floor(Math.random() * 15000);
+        SongBreaker();
+    }
+
+    function defaultCharCode() {
+        charCodeNode.value = 10384;
+        SongBreaker()
+    }
+
+    function toggleLyrics() {
+        let defaultLyrics = `One more time
+One more time
+
+One more time
+We're gonna celebrate
+Oh yeah, all right
+Don't stop the dancing
+One more time
+We're gonna celebrate
+Oh yeah, all right
+Don't stop the dancing
+One more time
+We're gonna celebrate
+Oh yeah, all right
+Don't stop the dancing
+One more time
+We're gonna celebrate
+Oh yeah
+One more time
+
+One more time
+We're gonna celebrate
+Oh yeah, all right
+Don't stop the dancing
+One more time
+We're gonna celebrate
+Oh yeah
+Don't stop the dancing
+One more time
+
+Mmm, you know I'm just feeling
+Celebration tonight
+Celebrate
+Don't wait too late
+Mmm, no
+We don't stop
+You can't stop
+We're gonna celebrate
+One more time
+One more time
+One more time
+Celebration
+You know we're gonna do it right, tonight
+Hey! Just feeling
+Music's got me feeling the need
+Need, yeah
+Come on, all right
+We're gonna celebrate
+One more time
+Celebrate and dance so free
+Music's got me feeling so free
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free
+One more time
+Music's got me feeling so free
+We're gonna celebrate
+Celebrate and dance so free`;
+
+        let babySharkLyrics = `Baby shark, doo, doo, doo, doo, doo, doo
+Baby shark, doo, doo, doo, doo, doo, doo
+Baby shark, doo, doo, doo, doo, doo, doo
+Baby shark
+
+Mommy shark, doo, doo, doo, doo, doo, doo
+Mommy shark, doo, doo, doo, doo, doo, doo
+Mommy shark, doo, doo, doo, doo, doo, doo
+Mommy shark
+
+Daddy shark, doo, doo, doo, doo, doo, doo
+Daddy shark, doo, doo, doo, doo, doo, doo
+Daddy shark, doo, doo, doo, doo, doo, doo
+Daddy shark
+
+Grandma shark, doo, doo, doo, doo, doo, doo
+Grandma shark, doo, doo, doo, doo, doo, doo
+Grandma shark, doo, doo, doo, doo, doo, doo
+Grandma shark
+
+Grandpa shark, doo, doo, doo, doo, doo, doo
+Grandpa shark, doo, doo, doo, doo, doo, doo
+Grandpa shark, doo, doo, doo, doo, doo, doo
+Grandpa shark
+
+Let's go hunt, doo, doo, doo, doo, doo, doo
+Let's go hunt, doo, doo, doo, doo, doo, doo
+Let's go hunt, doo, doo, doo, doo, doo, doo
+Let's go hunt
+
+Run away, doo, doo, doo, doo, doo, doo
+Run away, doo, doo, doo, doo, doo, doo
+Run away, doo, doo, doo, doo, doo, doo
+Run away
+
+Safe at last, doo, doo, doo, doo, doo, doo
+Safe at last, doo, doo, doo, doo, doo, doo
+Safe at last, doo, doo, doo, doo, doo, doo
+Safe at last
+
+It's the end, doo, doo, doo, doo, doo, doo
+It's the end, doo, doo, doo, doo, doo, doo
+It's the end, doo, doo, doo, doo, doo, doo
+It's the end`;
+
+
+
+        if (currentLyrics == 0) {
+            lyricsInputNode.value = babySharkLyrics;
+            currentLyrics = 1;
+            symbolLinebreak = '🦈';
+
+        } else {
+            lyricsInputNode.value = defaultLyrics;
+            currentLyrics = 0;
+            symbolLinebreak = '♫';
+        }
+        SongBreaker();
+    }
+</script>
