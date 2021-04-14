@@ -31,11 +31,15 @@
         
         .item {
             display: inline-block;
-            width: 450px;
+            width: 550px;
         }
         
         textarea {
             margin-right: 20px;
+        }
+        
+        td {
+            padding-right: 16px;
         }
     </style>
 </head>
@@ -45,7 +49,8 @@
         <h1 style="font-size: 23px;">🤘 SongBreaker</h1>
     </div>
     <sup>
-        Author: Rafał Wolsztyniak | <a href="https://github.com/rafal-wolsztyniak/SongBreaker/" target="_blank">GitHub</a> | <a href="https://www.linkedin.com/in/rafal-wolsztyniak/" target="_blank">LinkedIn</a> | <a href="https://twitter.com/HelloRafal/" target="_blank">Twitter</a> 
+        Author: Rafał Wolsztyniak |  <a href="https://github.com/rafal-wolsztyniak/SongBreaker/" target="_blank">GitHub</a> | <a href="https://www.linkedin.com/in/rafal-wolsztyniak/" target="_blank">LinkedIn</a> | <a href="https://www.instagram.com/hellorafal/" target="_blank">Instagram</a> | <a href="https://twitter.com/HelloRafal/" target="_blank">Twitter</a> <br>
+		Project: Generate strings representing the lyrics of Daft Punk's 'One More Time' classic song for the <a href="https://www.howtosfmc.com/posts/one-more-time-winners-announced/" target="_blank">HowToSFMC Challenge</a>		
 	</sup>
 
 
@@ -60,12 +65,16 @@
             </div>
             <div class="columnContainer">
                 <div>
-                    <label> Starting charcode:&nbsp;<br>
+                    <label> Starting CharCode:&nbsp;<br>
 					<input type="number" id="charCode" value="10384">
 					<input type="button" value="Randomize!" onclick="randomCharset()">
-					<input type="button" value="Braillize!" onclick="defaultCharCode()">
+					<input type="button" value="Braillify!" onclick="defaultCharCode()">
 				</label>
                     <div class="item"><br> Structure string:<br><br> <span id='structureString' style="word-wrap: break-word"></span>
+                        <br><br> Please note:<br> In this version there's no automatic pattern recognition, so any repeating lyrics need to be found manually.
+                        <hr>
+                    </div>
+                    <div class="item"><br> Word Array with Encoding:<br><br> <span id='wordArray' style="word-wrap: break-word"></span>
                         <hr>
                     </div>
                     <div class="item"><br> Word Array:<br><br> <span id='wordAnalysis' style="word-wrap: break-word"></span>
@@ -74,20 +83,8 @@
                     <div class="item"><br> Word String:<br><br> <span id='wordString' style="word-wrap: break-word"></span>
                         <hr>
                     </div>
-                    <div class="item"><br> Word list:<br><br> <span id='wordArray' style="word-wrap: break-word"></span>
-                        <hr>
-                    </div>
                 </div>
             </div>
-
-
-
-
-
-            <div id='lyricsBlock' style="word-wrap: break-word"></div>
-
-            <div id='outputBlock' style="word-wrap: break-word"></div>
-
     </form>
 </body>
 
@@ -107,50 +104,48 @@
     var wordArrayNode = document.getElementById("wordArray");
     var wordStringNode = document.getElementById("wordString");
     var structureStringNode = document.getElementById("structureString");
+    var structureArrayNode = document.getElementById("structureArray");
+
 
     // Asign the default song
     var currentLyrics = 1;
     toggleLyrics();
     lyrics = lyricsInputNode.value;
 
-
     var jsLinebreak = String.fromCharCode(10); // this the line break character for JavaScript
-    //var htmlLinebreak = '<br>'; // what will be the linebreak in the final output
-    var symbolLinebreak = '♫'
+    var htmlLinebreak = '<br>'; // what will be the linebreak in the final output
+    var symbolLinebreak = '♫'; // alternatives ♫ ♬ •
 
+    SongBreaker();
 
-
-    // ♫ ♬ •
-
-
+    // 🛠️ Functions! 
 
     function SongBreaker() {
+        //reset
         song.words = [];
         song.structure = null;
         console.clear();
-        var lyrics = lyricsInputNode.value;
+
+        // Sart the process again
+        lyrics = lyricsInputNode.value;
         var charset = parseInt(charCodeNode.value);
         var words = lyrics.replaceAll(",", ', ').replaceAll(jsLinebreak, ' ');
-        words = words.split(' '); // convert this to an array
+        words = words.split(' '); // convert the words to an array
         words.sort(function(a, b) {
             // ASC  -> a.length - b.length
             // DESC -> b.length - a.length
             return b.length - a.length; // used to sort the string by descending length  https://stackoverflow.com/questions/10630766/how-to-sort-an-array-based-on-the-length-of-each-element
         });
 
-
-
-        var structure = '[structure]'
+        var structure = '';
         words = [...new Set(words)]; // used to dedupe the string array: https://stackoverflow.com/questions/9229645/remove-duplicate-values-from-js-array
-        words.pop();
+        words.pop(); // remove the last array element - it has the length of 0 = it's empty
 
         var structure = lyrics.replaceAll(",", ' ,').replaceAll(jsLinebreak, ' ' + symbolLinebreak + ' ');
 
         for (c = 0; c < words.length; c++) {
 
             if (words[c].length > 0) {
-                //structure = structure.replaceAll(words[c], c); // will show the indexes in the string
-                //console.log(`charset=${charset} ${typeof charset}/ c=${c}`);
                 structure = structure.replaceAll(words[c], String.fromCodePoint(charset + c)).replaceAll(' ', '');
 
             }
@@ -158,21 +153,32 @@
         song.words = words;
         song.structure = structure;
 
+        // Output to the page:
+
         wordAnalysisNode.innerHTML = `${JSON.stringify(song.words)}`;
         wordArrayNode.innerHTML = `${song.words.join('<br>')}`;
         wordStringNode.innerHTML = `"${song.words.join(' ')}"`;
         structureStringNode.innerHTML = song.structure;
 
+        // Build a table showing the words and their single-character representations:
 
-        console.log([
-            song.words,
-            song.words.length,
-            '-',
-            song.structure,
-            song.structure.length
-        ])
+        var rows = ''
+        for (w in song.words) {
+            rows += `<tr> 
+				<td>${song.words[w]}</td>
+				<td>${w}</td> 
+				<td>${parseInt(w) + charset}</td> 
+				<td>${String.fromCodePoint(parseInt(w) + charset)}</td> 
+				</tr>`;
+        }
+        var header = `<tr> 
+				<td>Word</td>
+				<td>Index</td> 
+				<td>Index+CharCode</td> 
+				<td>String.fromCharCode()</td> 
+				</tr>`
+        wordArrayNode.innerHTML = '<table>' + header + rows + '</table>';
     }
-    SongBreaker();
 
     function randomCharset() {
         charCodeNode.value = Math.floor(Math.random() * 15000);
@@ -181,7 +187,13 @@
 
     function defaultCharCode() {
         charCodeNode.value = 10384;
-        SongBreaker()
+        SongBreaker();
+    }
+
+    function censor() {
+        charCodeNode.value = 9598;
+        symbolLinebreak = ' ';
+        SongBreaker();
     }
 
     function toggleLyrics() {
@@ -362,4 +374,17 @@ It's the end`;
         }
         SongBreaker();
     }
+</script>
+<!-- 👁️ Sorry, I'm curious if anyone even opens this page:
+		 Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3VY0LB7ZQC"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+
+    gtag('config', 'G-3VY0LB7ZQC');
 </script>

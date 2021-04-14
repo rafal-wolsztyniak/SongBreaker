@@ -1,7 +1,7 @@
 
 ## Hello,  SFMC Developers!
 
-This is a repository for the solution that won in the **Efficiency** category on [HowToSFMC](https://www.howtosfmc.com/posts/one-more-time-winners-announced/). The overall goal of the challenge was to generate the lyrics of the Daft Punk classic hit "One More Time" using Server-Side JavaScript in Marketing Cloud.
+This is a repository for the solution that won in the **Efficiency** category on **[HowToSFMC](https://www.howtosfmc.com/posts/one-more-time-winners-announced/)**. The overall goal of the challenge was to generate the lyrics of the Daft Punk classic hit "One More Time" using Server-Side JavaScript in Marketing Cloud.
 
 The **Efficiency** category itself was described as follows:
 
@@ -19,13 +19,15 @@ You'll find three files:
 - `00 - SongBreaker` 
    - This is a page that generates the code for the words and structure strings that are then used in a minimized versions
    - This code will not run CloudPages - it uses newer JS capabilities to work with the arrays
+   - It wasn't sensible to build pattern recognition for just one song, so any repeating sequences of words need to be found manually
    - **[Click here](https://hellosfmc.com/SongBreaker.html)** to see the script in action and possibly break other songs
 - `01 - Original Submission - 693 characters`
     - The submitted solution that won
 - `02 - Optimized After the Submission - 664 characters`
     - I couldn't help but try to optimize it a bit more and was able to cut the total length a bit and fix the obvious blunder I had made with conditionals in the original submission.
 
-Visit [my article on HowToSFMC](https://www.howtosfmc.com/posts/one-more-time-efficiency-winner/) to learn how the submitted solution works.
+Visit **[my article on HowToSFMC](https://www.howtosfmc.com/posts/one-more-time-efficiency-winner/)** to learn how the submitted solution works.
 
 Cheers
+
 [Rafał](https://www.linkedin.com/in/rafal-wolsztyniak/)
