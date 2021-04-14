@@ -1,4 +1,5 @@
 
+
 ## Hello,  SFMC Developers!
 
 This is a repository for the solution that won in the **Efficiency** category on **[HowToSFMC](https://www.howtosfmc.com/posts/one-more-time-winners-announced/)**. The overall goal of the challenge was to generate the lyrics of the Daft Punk classic hit "One More Time" using Server-Side JavaScript in Marketing Cloud.
